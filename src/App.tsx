@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import CharacterList from "./components/CharacterList";
+import { Character } from "./types/Character";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [page, setPage] = useState<number>(1);
+
+  const API_URL = `https://thesimpsonsapi.com/api/characters?page=${page}`;
+
+  useEffect(() => {
+    const fetchCharacters = async () => {
+      try {
+        const response = await fetch(API_URL);
+        const data: Character[] = await response.json();
+        setCharacters(data);
+      } catch (error) {
+        console.error("Error al cargar personajes", error);
+      }
+    };
+
+    fetchCharacters();
+  }, [page]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="App">
+      <h1>Personajes de Los Simpsons</h1>
 
-export default App
+      <div className="pagination">
+        <button onClick={() => setPage(page - 1)} disabled={page === 1}>
+          ◀ Anterior
+        </button>
+
+        <span>Página {page}</span>
+
+        <button onClick={() => setPage(page + 1)}>
+          Siguiente ▶
+        </button>
+      </div>
+
+      <CharacterList characters={characters} />
+    </div>
+  );
+};
+
+export default App;
